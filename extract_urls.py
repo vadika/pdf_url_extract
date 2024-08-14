@@ -1,10 +1,11 @@
-from PyMuPDF import fitz
+#!/usr/bin/env python3
 import sys
+from PyPDF2 import PdfReader
 
 def extract_urls_from_pdf(pdf_path):
     try:
         # Open the PDF file
-        document = fitz.open(pdf_path)
+        reader = PdfReader(pdf_path)
     except Exception as e:
         print(f"Error opening PDF file: {e}")
         sys.exit(1)
@@ -12,14 +13,15 @@ def extract_urls_from_pdf(pdf_path):
     urls = []
     
     # Iterate over each page
-    for page_num in range(document.page_count):
-        page = document.load_page(page_num)
-        links = page.get_links()
-
-        # Extract URLs from the links
-        for link in links:
-            if 'uri' in link:
-                urls.append(link['uri'])
+    for page in reader.pages:
+        # Extract annotations (which include links)
+        if '/Annots' in page:
+            for annot in page['/Annots']:
+                obj = annot.get_object()
+                if obj.get('/Subtype') == '/Link' and '/A' in obj:
+                    action = obj['/A']
+                    if action.get('/S') == '/URI':
+                        urls.append(action.get('/URI'))
 
     return urls
 

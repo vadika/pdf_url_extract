@@ -1,5 +1,4 @@
-#/usr/bin/env python3
-import fitz  # PyMuPDF
+from PyMuPDF import fitz
 import sys
 
 def extract_urls_from_pdf(pdf_path):
